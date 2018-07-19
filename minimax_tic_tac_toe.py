@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[21]:
+# In[ ]:
 
 
 import numpy as np
@@ -12,17 +12,16 @@ from os import system
 from pprint import pprint
 
 
-# In[64]:
+# In[ ]:
 
 
 HUMAN = -1
 COMP = +1
 
 board = np.zeros((3,3), dtype=np.int)
-pprint(board)
 
 
-# In[37]:
+# In[ ]:
 
 
 def print_state(state):
@@ -43,7 +42,7 @@ def print_state(state):
         print()
 
 
-# In[63]:
+# In[ ]:
 
 
 # # example:
@@ -54,7 +53,7 @@ def print_state(state):
 # print_state(state.tolist())
 
 
-# In[68]:
+# In[ ]:
 
 
 def evaluate(state):
@@ -69,9 +68,11 @@ def evaluate(state):
         score = -1
     else:
         score = 0
+        
+    return score
 
 
-# In[69]:
+# In[ ]:
 
 
 def wins(state, player):
@@ -97,7 +98,7 @@ def wins(state, player):
         return False # player doesn't win
 
 
-# In[70]:
+# In[ ]:
 
 
 def game_over(state):
@@ -109,7 +110,7 @@ def game_over(state):
     return wins(state, HUMAN) or wins(state, COMP)
 
 
-# In[79]:
+# In[ ]:
 
 
 def empty_locations(state):
@@ -122,7 +123,7 @@ def empty_locations(state):
     return locs
 
 
-# In[80]:
+# In[ ]:
 
 
 def valid_move(x,y):
@@ -136,7 +137,7 @@ def valid_move(x,y):
     return board[x,y]==0
 
 
-# In[84]:
+# In[ ]:
 
 
 def set_move(x, y, player):
@@ -154,7 +155,7 @@ def set_move(x, y, player):
         return False
 
 
-# In[105]:
+# In[ ]:
 
 
 def minimax(state, depth, player):
@@ -166,7 +167,7 @@ def minimax(state, depth, player):
     :param depth: how many layers are left to go down. in the initial state, it's 9, and if the board is full - it is 0.
     :param player: HUMAN or COMP
     :return: best, which correspond to the best move for playe from the current state. best = [x, y, score]
-    """ 
+    """
     if player==COMP:
         best = [-1, -1, -inf] # best should include the best move after the for-loop later. in the form of [x, y, score]
                               # we initiate it with [-1, -1] for no location, and -inf so that the first outcome (score) will override it.
@@ -183,7 +184,7 @@ def minimax(state, depth, player):
         score = minimax(state, depth-1, -player) # run minimax for the (state, player) as if the current move was (x,y)
         state[x,y] = 0
         score = [x, y, score[2]]
-        
+
         if player==COMP: # player==COMP, max move
             if score[2] > best[2]:
                 best = score
@@ -194,7 +195,7 @@ def minimax(state, depth, player):
     return best
 
 
-# In[106]:
+# In[ ]:
 
 
 def clean():
@@ -211,49 +212,173 @@ def clean():
 # In[ ]:
 
 
-def render(state, c_choice, h_choice):
+def render(state, c_choice="X", h_choice="O"):
     """
-    Prints the board on console
+    This function prints a state to the screen.
+    :param state: the state (np.array of size 3X3)
+    :return: only prints. returns None.
     """
+    for row in state:
+        print("|", end="")
+        for element in row:
+            if element==-1:
+                print(" %s |"%h_choice, end="")
+            elif element==1:
+                print(" %s |"%c_choice, end="")
+            else:
+                print("   |", end="")
+        print()
 
 
-# In[59]:
+# In[ ]:
 
 
-state = board.copy()
-state[2, :] = np.array([1,1,1])
-state[2, 2] = 0
-state
+def ai_turn(c_choice="X", h_choice="O"):
+    """
+    This function runs the ai turn.
+    :param c_choice: how to mark AI's moves (X/O)
+    :param h_choice: how to mark human's moves (X/O)
+    :return: only changes the board state. returns None.
+    """
+    depth = len(empty_locations(board))
+    if depth==0 or game_over(board):
+        return 
+    
+    clean()
+    players_markers = "HUMAN: %s; COMP: %s"%(h_choice, c_choice)
+    print(players_markers)
+    print('Computer turn [{}]\n'.format(c_choice))
+    render(board, c_choice, h_choice) # prints current board.
+    if depth==9: # random pick if it's first move
+        x=np.random.choice([0,1,2])
+        y=np.random.choice([0,1,2])
+    else: # depth in the range of 1-8 - use the minimax to pick best move
+        move = minimax(board, depth, COMP)
+        (x,y) = move[0], move[1]
+        
+    set_move(x, y, COMP)
+    time.sleep(1)   
 
 
-# In[83]:
+# In[1]:
 
 
-print_state(board)
-valid_move(2,2)
+all_moves_string = """
+
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+| 7 | 8 | 9 |
+"""
 
 
-# In[101]:
+# In[ ]:
 
 
-a = [[1,2,3]]
+def human_turn(c_choice="X", h_choice="O"):
+    """
+    This function runs the human turn - the human player picks its move.
+    :param c_choice: how to mark AI's moves (X/O)
+    :param h_choice: how to mark human's moves (X/O)
+    :return: only changes the board state. returns None.
+    """
+    depth = len(empty_locations(board))
+    if depth==0 or game_over(board):
+        return 
+    
+    # Dictionary of valid moves
+    move = -1
+    moves= dict()
+    for i in range(3):
+        for j in range(3):
+            counter = i*3+j+1
+            moves[counter] = [i, j] # eventually: moves={1:[0,0], 2:[0,1], 3:[0,2], 4:[1,0]... 9:[2,2]}
+            
+    clean()
+    players_markers = "HUMAN: %s; COMP: %s"%(h_choice, c_choice)
+    print(players_markers)
+    print('Human turn [{}]\n'.format(h_choice))
+    render(board, c_choice, h_choice) # prints current board.
+    print(all_moves_string)
+    
+    while (move<1 or move>9):
+        try:
+            move = int(input('Use nampad (only 0 to 9).'))
+            coord = moves[move]
+            try_move = set_move(coord[0], coord[1], HUMAN)
+            
+            if try_move==False:
+                print('Bad Move!')
+                move = -1
+                
+        except KeyboardInterrupt:
+            print('Bye...')
+            exit()
+        except:
+            print('Bad Choice')
 
 
-# In[102]:
+# In[2]:
 
 
-def f(x):
-    x[0][2] = 10
+def main():
+    """
+    Main function that calls all functions
+    """
+    clean()
+    h_choice = "-"
+    
+    while h_choice not in "OX":
+        try:
+            h_choice = input('Choose X or O\nChosen: ')
+            h_choice = h_choice.upper()
+        except KeyboardInterrupt:
+            print('Bye')
+            exit()
+        except:
+            print('Bad choice')
+
+    # Setting computer's choice
+    if h_choice == 'X':
+        first = "HUMAN"
+        c_choice = 'O'
+    else:
+        first="COMP"
+        c_choice = 'X'
+
+    # Human may starts first
+    clean()
+
+    # Main loop of this game
+    while len(empty_locations(board)) > 0 and not game_over(board):
+        if first == 'COMP':
+            ai_turn(c_choice, h_choice)
+            first = ''
+
+        human_turn(c_choice, h_choice)
+        ai_turn(c_choice, h_choice)
+
+    # Game over message
+    if wins(board, HUMAN):
+        clean()
+        print('Human turn [{}]\n'.format(h_choice))
+        render(board, c_choice, h_choice)
+        print('\nYOU WIN!\n')
+    elif wins(board, COMP):
+        clean()
+        print('Computer turn [{}]\n'.format(c_choice))
+        render(board, c_choice, h_choice)
+        print('\nYOU LOSE!\n')
+    else:
+        clean()
+        render(board, c_choice, h_choice)
+        print('\nDRAW!\n')
+
+    exit()
 
 
-# In[103]:
+# In[ ]:
 
 
-f(a)
-
-
-# In[104]:
-
-
-a
+if __name__ == '__main__':
+    main()
 
