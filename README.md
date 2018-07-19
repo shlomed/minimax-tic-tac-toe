@@ -4,5 +4,5 @@ Based on the implementation of: https://github.com/Cledersonbc/tic-tac-toe-minim
 
 ![Alt text](tic_tac_toe.png?raw=true "Title")
 
-Run:  
+*Run:*  
 python minimax-tic-tac-toe.py
