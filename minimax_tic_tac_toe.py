@@ -260,7 +260,7 @@ def ai_turn(c_choice="X", h_choice="O"):
     time.sleep(1)   
 
 
-# In[1]:
+# In[ ]:
 
 
 all_moves_string = """
@@ -295,14 +295,14 @@ def human_turn(c_choice="X", h_choice="O"):
             
     clean()
     players_markers = "HUMAN: %s; COMP: %s"%(h_choice, c_choice)
-    print(players_markers)
     print('Human turn [{}]\n'.format(h_choice))
     render(board, c_choice, h_choice) # prints current board.
     print(all_moves_string)
     
     while (move<1 or move>9):
         try:
-            move = int(input('Use nampad (only 0 to 9).'))
+            move = int(input('Use nampad (only 0 to 9)\n'))
+            print(players_markers)
             coord = moves[move]
             try_move = set_move(coord[0], coord[1], HUMAN)
             
@@ -317,7 +317,7 @@ def human_turn(c_choice="X", h_choice="O"):
             print('Bad Choice')
 
 
-# In[2]:
+# In[ ]:
 
 
 def main():
