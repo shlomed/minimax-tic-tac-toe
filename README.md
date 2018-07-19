@@ -2,5 +2,5 @@
 Implementation of the minimax algorithm for the tic-tac-toe game.  
 Based on the implementation of: https://github.com/Cledersonbc/tic-tac-toe-minimax
 
-run:  
+Run:  
 python minimax-tic-tac-toe.py
